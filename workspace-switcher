@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+MENU="wmenu -i"
+WORKSPACES=$(swaymsg -t get_workspaces --pretty | awk '/Workspace/ {print $1,$2}')
+SELECTED=$(echo "$WORKSPACES" | $MENU | awk '{print $2}')
+swaymsg "workspace $SELECTED"
