@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+MENU=wmenu
+BROWSER=google-chrome-stable
+BOOKMARK_FILE="$HOME/.config/bookmarks.conf"
+
+[[ ! -f "$BOOKMARK_FILE" ]] && echo "GitHub https://github.com" >"$BOOKMARK_FILE"
+
+main() {
+  local list=$(awk '!/^ *#/ && NF {print $1}' "${BOOKMARK_FILE}")
+  local list_size=$(awk '!/^ *#/ && NF {print $1}' "${BOOKMARK_FILE}" | wc -l)
+
+  local choice=$(printf '%s\n' "${list}" | ${MENU} -i -p "${BROWSER} open: [${list_size}]" "$@")
+
+  if [ -n "$choice" ]; then
+    local url=$(awk -v title="${choice}" '$1 == title {print $NF}' "${BOOKMARK_FILE}") || exit 1
+    nohup "${BROWSER}" "${url}" >/dev/null 2>&1 &
+  else
+    notify-send "Program terminated." && exit 1
+  fi
+}
+
+[[ "${BASH_SOURCE[0]}" == "${0}" ]] && main "$@"
